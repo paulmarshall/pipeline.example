@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="Default Web Site/Shop.Service" />
+  <parameter name="MyDb" description="Connection string to my db" defaultValue="data source=.\SQLEXPRESS;Integrated Security=SSPI;AttachDBFilename=|DataDirectory|\aspnetdb.mdf;User Instance=true" tags="">
+    <parameterEntry kind="XmlFile" scope="\\web.config$" match="/configuration/connectionStrings/add[@name='MyDb']/@connectionString" />
+  </parameter>
+
+</parameters>

@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask  AssemblyFile="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.dll"
+              TaskName="MSBuild.Community.Tasks.FileUpdate"></UsingTask>
+
+  <PropertyGroup>
+    <!--
+    <_VCInstallFolder Condition="'$(VCINSTALLDIR)' == ''">c:\program files\microsoft visual studio 10.0\vc\</_VCInstallFolder>
+    <_VCInstallFolder Condition="'$(VCINSTALLDIR)' != ''">$(VCINSTALLDIR)</_VCInstallFolder>    
+    <VCVARS32>&quot;$(_VCInstallFolder)bin\vcvars32.bat&quot;</VCVARS32>
+    -->
+    <Configuration>Release</Configuration>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OrganisationTelephoneNumber>TODO - telephone</OrganisationTelephoneNumber>
+    <OrganisationDevelopmentEmail>TODO - email</OrganisationDevelopmentEmail>
+    <OrganisationLegalCopyright>TODO - copyright</OrganisationLegalCopyright>
+    <OrganisationLegalTrademark>TODO - trademarks</OrganisationLegalTrademark>
+  </PropertyGroup>  
+
+  <!--
+  Example usage:
+  <ItemGroup>
+    <DotNetBuildConfiguration Include="$(MSBuildStartupDirectory)\MySolution.sln">
+      <FlavorToBuild>$(Configuration)</FlavorToBuild>
+      <PlatformToBuild>Any CPU</PlatformToBuild>
+    </DotNetBuildConfiguration>
+    ...
+  </ItemGroup>
+  -->
+
+  <PropertyGroup>
+    <BuildDotNetDependsOn>
+      _UpdateDotNetAssemblyVersionNumberAndLegalInfo;
+      _BuildMSBuildSolution
+    </BuildDotNetDependsOn>
+  </PropertyGroup>   
+  <Target Name="BuildDotNet" 
+          DependsOnTargets="$(BuildDotNetDependsOn)">
+    <Message Text="BuildDotNet"/>
+  </Target>
+
+
+  <PropertyGroup>
+    <BuildDotNetProjectDependsOn>
+      _BuildMSBuildProject
+    </BuildDotNetProjectDependsOn>
+  </PropertyGroup>
+  <Target Name="BuildDotNetProject"
+          DependsOnTargets="$(BuildDotNetProjectDependsOn)">
+    <Message Text="BuildDotNetProject"/>
+  </Target>
+  
+  <Target Name="_UpdateDotNetAssemblyVersionNumberAndLegalInfo">
+    <Message Text="_UpdateDotNetAssemblyVersionNumberAndLegalInfo"/>
+
+    <!-- TODO: When a common project layout is defined, this search can be refined to be '$(MSBuildStartupDirectory)\src\**\AssemblyInfo.cs' -->
+    <ItemGroup>
+      <AssemblyInfoFiles Include="$(MSBuildStartupDirectory)\**\AssemblyInfo.cs"/>
+    </ItemGroup>
+
+    <!-- Version -->
+    <FileUpdate Files="@(AssemblyInfoFiles)"
+                Regex="AssemblyVersion\(&quot;.*&quot;\)"
+                ReplacementText="AssemblyVersion(&quot;$(VersionFull)&quot;)" />
+
+    <FileUpdate Files="@(AssemblyInfoFiles)"
+                Regex="AssemblyFileVersion\(&quot;.*&quot;\)"
+                ReplacementText="AssemblyFileVersion(&quot;$(VersionFull)&quot;)" />
+
+    <!-- Legal -->
+    <FileUpdate Files="@(AssemblyInfoFiles)"
+                Regex="AssemblyCopyright\(&quot;.*&quot;\)"
+                ReplacementText="AssemblyCopyright(&quot;$(OrganisationLegalCopyright)&quot;)" />
+    <FileUpdate Files="@(AssemblyInfoFiles)"
+                Regex="AssemblyTrademark\(&quot;.*&quot;\)"
+                ReplacementText="AssemblyTrademark(&quot;$(OrganisationLegalTrademark)&quot;)" />
+
+  </Target>
+
+  <Target Name="_BuildMSBuildSolution" 
+          Outputs="%(DotNetBuildConfiguration.Identity)">
+    <Message Text="_BuildMSBuildSolution (Id=%(DotNetBuildConfiguration.Identity))"/>
+
+    <MSBuild Projects="%(DotNetBuildConfiguration.Identity)"
+             Targets="Build"
+             Properties="Configuration=%(DotNetBuildConfiguration.FlavorToBuild);Platform=%(DotNetBuildConfiguration.PlatformToBuild);VersionFull=$(VersionFull);%(DotNetBuildConfiguration.AdditionalProperties)"/>
+
+  </Target>
+
+  <Target Name="_BuildMSBuildProject"
+        Outputs="%(DotNetProjectBuildConfiguration.Identity)">
+    <Message Text="_BuildMSBuildProject (Id=%(DotNetProjectBuildConfiguration.Identity))"/>
+
+    <Message Text="Configuration=%(DotNetBuildConfiguration.FlavorToBuild);Platform=%(DotNetBuildConfiguration.PlatformToBuild);VersionFull=$(VersionFull);%(DotNetBuildConfiguration.AdditionalProperties)"/>
+    
+    <MSBuild Projects="%(DotNetBuildConfiguration.Identity)"
+             Targets="%(DotNetProjectBuildConfiguration.Identity)"
+             Properties="Configuration=%(DotNetBuildConfiguration.FlavorToBuild);Platform=%(DotNetBuildConfiguration.PlatformToBuild);VersionFull=$(VersionFull);%(DotNetBuildConfiguration.AdditionalProperties)"/>
+
+  </Target>
+
+  <Target Name="PackageWeb"
+		Outputs="%(WebPackageBuildConfiguration.Identity)">
+    <Message Text="PackageWeb (Id=%(WebPackageBuildConfiguration.Identity))"/>
+
+    <MSBuild Projects="%(WebPackageBuildConfiguration.Identity)"
+             Targets="Package"
+             Properties="Configuration=%(WebPackageBuildConfiguration.FlavorToBuild)"/>
+
+  </Target>
+  
+</Project>

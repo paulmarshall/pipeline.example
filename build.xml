@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="lib\pipeline\pipeline.xml"/>
+
+  <ItemGroup>
+    <DotNetBuildConfiguration Include="$(MSBuildStartupDirectory)\Shop.sln">
+      <FlavorToBuild>$(Configuration)</FlavorToBuild>
+      <PlatformToBuild>Any CPU</PlatformToBuild>
+    </DotNetBuildConfiguration>
+  </ItemGroup>
+
+  <ItemGroup>
+    <WebPackageBuildConfiguration Include="$(MSBuildStartupDirectory)\src\Shop.Service.Host.Web\*.csproj">
+      <FlavorToBuild>$(Configuration)</FlavorToBuild>
+    </WebPackageBuildConfiguration>
+  </ItemGroup>   
+
+  <PropertyGroup>
+    <CorePackageDependsOn>
+      PackageWeb;
+      PackageTests;
+    </CorePackageDependsOn>
+  </PropertyGroup>
+  <Target Name="CorePackage" 
+          DependsOnTargets="$(CorePackageDependsOn)">
+    <Message Text="CorePackage (build)"/>
+  </Target>  
+
+  <PropertyGroup>
+    <CoreDeployPackageDependsOn>
+      DeployWeb
+    </CoreDeployPackageDependsOn>
+  </PropertyGroup>
+  <Target Name="CoreDeployPackage"
+          DependsOnTargets="$(CoreDeployPackageDependsOn)">
+    <Message Text="CoreDeployPackage (build)"/>
+  </Target>  
+ 
+</Project>

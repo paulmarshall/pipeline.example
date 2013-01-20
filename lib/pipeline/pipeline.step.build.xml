@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask  AssemblyFile="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.dll"
+              TaskName="MSBuild.Community.Tasks.Time"></UsingTask>
+
+  <PropertyGroup>
+    <BeforeBuildDependsOn>
+      GetVersion;
+      GetBuildDate;
+      GetBuildArtifacts;
+      $(BeforeBuildDependsOn);
+    </BeforeBuildDependsOn>
+  </PropertyGroup>
+  <Target Name="BeforeBuild" DependsOnTargets="$(BeforeBuildDependsOn)">
+    <Message Text="BeforeBuild (pipeline.step.build)"/>
+  </Target>
+
+  <PropertyGroup>
+    <CoreBuildDependsOn>
+      BuildDotNet;
+    </CoreBuildDependsOn>
+  </PropertyGroup>
+  <Target Name="CoreBuild" DependsOnTargets="$(CoreBuildDependsOn)">
+    <Message Text="CoreBuild (pipeline.step.build)"/>
+  </Target>  
+
+  <PropertyGroup>
+    <GetVersionDependsOn>
+      GetProductVersionFromFile;
+      GetBuildNumber;
+    </GetVersionDependsOn>
+  </PropertyGroup>
+  <Target Name="GetVersion" DependsOnTargets="$(GetVersionDependsOn)">
+    <Message Text="GetVersion (pipeline.step.build)"/>
+
+    <!-- A UH convention is for the build part to be the 4th element of the version. -->
+    <!-- Microsoft adopt the convention for build to be the 3rd element -->
+    <PropertyGroup>
+      <VersionFull>$(VersionMajor).$(VersionMinor).$(VersionRevision).$(VersionBuild)</VersionFull>
+    </PropertyGroup>
+    <Message Text="Version=$(VersionFull)"/>
+
+  </Target>
+
+  <Target Name="GetBuildNumber">
+    <Message Text="GetBuildNumber (pipeline.step.build)"/>
+
+    <PropertyGroup>
+      <VersionBuild Condition="'$(BUILD_NUMBER)' != ''">$(BUILD_NUMBER)</VersionBuild>
+      <VersionBuild Condition="'$(BUILD_NUMBER)' == ''">0</VersionBuild>
+    </PropertyGroup>
+
+  </Target>
+
+  <Target Name="GetBuildDate">
+    <Message Text="GetBuildDate (pipeline.step.build)"/>
+
+    <Time Format="dd/MM/yyyy">
+      <Output TaskParameter="Year" PropertyName="BuildDateYear"/>
+      <Output TaskParameter="Month" PropertyName="BuildDateMonth"/>
+      <Output TaskParameter="Day" PropertyName="BuildDateDay"/>
+    </Time>
+
+    <Time Format="MMMM">
+      <Output TaskParameter="FormattedTime" PropertyName="BuildDateMonthFull"/>
+    </Time>
+
+  </Target>
+ 
+</Project>
